@@ -38,6 +38,7 @@ B.icecast2 のテスト
 B-1. Traktor のストリーミング設定を行う
 	Preference > Broadcasting > Server Settings
 		Address: localhost  Port: 8000
+			(A-3で変更した場合はそれに合わせる)
 		Password: A-3で設定したもの
 		Format: 音は聴かないので何でも良い
 
@@ -71,6 +72,8 @@ C. "icecast Song" プラグインの使用手順
 
 3. CamTwist で "icecast Song" エフェクトをADDする
 
-4. "icecast Song" の詳細パラメータ（文字サイズや表示位置など）を変更する
+4. A-3でホストやポート名の設定を変えた場合は、
+	"icecast Song" のパラメータ "icecast URL" を変更する
 
+5. 必要なら "icecast Song" の文字サイズや表示位置などを調整する
 
