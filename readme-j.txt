@@ -1,106 +1,125 @@
-CamTwist "icecast Song" plugin
+Traktor::SongNameServer, tweet-from-traktor.pl and CamTwist "Traktor Song" plugin
 
-Traktor でプレイ中の曲名を CamTwist に表示させる事ができます。
-
+[Traktor::SongNameServer]
+Traktor でプレイ中の曲名を受信し、他のソフトから利用できる様にするサーバです。
 他の PCDJ ソフトでも、icecastストリーミングプロトコルに対応しているものであれば動作する筈です。
+起動するには songnameserver.pl を使ってください。
 
-TweetFromTraktor.pl を追加しました。これはプレイ中の曲名をさらに twitter にポストする為のスクリプトです。
+[tweet-from-traktor.pl]
+Traktor::SongNameServer を使って、Traktor でプレイ中の曲名を Twitter にポストします。
+
+[CamTwist "Traktor Song" plugin]
+Traktor::SongNameServer と通信して、Traktor でプレイ中の曲名を CamTwist に表示します。
 
 
 [概要]
 
-"icecast Song" は TRAKTOR(等のPCDJ)で再生中の曲名情報を icecast2 サーバから取得します。
-TRAKTORはプレイ中のサウンドを曲名情報と一緒に icecast2 サーバにストリーミング送信します。
+Traktor::SongNameServer を起動すると icecast サーバとして動作します。
 
-　　　　　　┌───────┐
-　　　　　　│icecast2サーバ│
-　　　　　　└───────┘
+Traktor でこのサーバを Broadcasting Server に設定する事で、プレイした曲名データが Traktor::SongNameServer に送信されます。
+
+CamTwist "Traktor Song" plugin は Traktor::SongNameServer から曲名情報を取得します。
+
+tweet-from-traktor.pl は Traktor::SongNameServer からコールバックされ、Twitterに曲名情報を含むツイートをポストします。
+
+　　　　　　┌────────────┐Callback┌───────────┐
+　　　　　　│Traktor::SongNameServer │------→│tweet-from-traktor.pl │
+　　　　　　└────────────┘　　　　└───────────┘
 UPSTREAM DJing↑　　　　　↓FETCH song info
-　　　　┌──┴─┐　┌─┴────────┐
-　　　　│TRAKTOR │　│icecast Song plugin │
-　　　　└────┘　└──────────┘
+　　　　┌──┴─┐　┌─┴───────┐
+　　　　│Traktor │　│Traktor Song plugin│
+　　　　└────┘　└─────────┘
 
-icecast2 は MacPorts からインストールすると簡単です。
-MacPortsの使い方は検索して下さい。
+
+		cue.bysong: 曲名の更新を、n曲分遅らせる
+		cue.bytime: 曲名の更新を、n秒遅らせる
+		cue.nextsongtimeout: 次の曲がn秒プレイされなかったら、bysongの設定を無視して曲名を更新する
+		cue.ignoreshortplay: n秒未満しか再生されなかった曲は、プレイされなかった事にする
 
 
 [マニュアル]
-下記 [Adv.] がついている項目は、 icecast2 を Macports を使わずにインストールしたり、サーバのポート番号を変更したりといった事をする「よくわかってる人」向けの説明です。
+下記 [Adv.] がついている項目は、「よくわかってる人」向けの説明です。
 
 
-A.インストール
+[A: Traktor::SongNameServer を使える様にしよう]
 
-A-1. icecast2 をインストールする
-	MacPorts でインストールする場合
-		sudo port install icecast2
+A-1. インストールと設定
+	このフォルダを任意の場所に置く
+	[Adv.] songnameserver.pl を開いて、設定を変更する
+		host, port: サーバの待ち受けアドレスとポート番号
+		※ここを変更した場合は以下の "localhost" "8000" を変更した物に読み替える
+	（WindowsやLinuxの人は、Perlをインストールしておく）
 
-	[Adv.]ソースからインストールした場合等は、以下の /opt/local/.. を適宜 /usr/local/.. 等に読み替える事
-
-A-2. icecast2 の status.xsl を同梱の物に置き換える
-	status.xsl は以下にインストールされているので、これを置き換える
-		/opt/local/share/icecast/web/
-
-A-3. icecast2 の設定を行う
-	/opt/local/etc/icecast.xml を変更する
-	authenticationブロックのパスワードを設定する(必須)
-
-	[Adv.]もしも必要なら以下も変更する
-		hostname
-		listen-socket ブロックの port (ポート番号)
-		ここを変更した場合は以下の "localhost" "8000" を変更した物に読み替える事
-
-A-4. icecast2 のログ出力先を作る
-	icecast2のログファイルの出力先
-		/opt/local/var/log/icecast/
-	が必要なのでこれを作る
-		mkdir -p /opt/local/var/log/icecast
-	自分が書き込めるパーミッションを設定する。
-
-A-5. icecast Song.qtz をインストールする
-	下記のどちらかに icecast Song.qtz ファイルを置く
-		CamTwist インストールフォルダの Effects フォルダ
-		~/Library/Application Support/CamTwist/Effects
-
-
-B.icecast2 のテスト
-
-B-1. Traktor のストリーミング設定を行う
+A-2. Traktor のストリーミング設定を行う
 	Preference > Broadcasting > Server Settings
 		Address: localhost  Port: 8000
-		Password: A-3で設定したもの
-		Format: 音は聴かないので何でも良い
+		Password: 空白
+		Format: Ogg Vorbis, 11025 Hz, 32kBit/s
 
-B-2. icecast2 を起動する
-	icecast -c /opt/local/etc/icecast.xml
+A-3. Traktor::SongNameServer を起動
+	ターミナルで perl songnameserver.pl を実行
 
-B-3. Traktor でストリーミングを開始する
+A-4. Traktor でストリーミングを開始する
 	AUDIO RECORDER ペインを開き、STREAMINGボタンを押す
 	ストリーミングに成功するとボタンが光る
+	（失敗すると、ボタンは点滅する）
 
-B-4. ブラウザでストリーミングの曲名を確認する
-	ブラウザで下記のアドレスを開く
-		http://localhost:8000/
-	下記の様な曲名を載せたXMLファイルが見えたら成功
-	<status>
-		<source>
-			<mountpoint>/</mountpoint>
-			<artist>takuya</artist>
-			<title>364 Nights</title>
-		</source>
-	</status>
-
-	なお、曲名が更新されるタイミングは「新しく曲をデッキにロードして、デッキを再生してしばらく後」なので、テストの際はストリーミング開始後に必ず曲をデッキにロードしてから再生する必要がある
+A-5. 曲名を更新させて、表示を確認する
+	曲を 2, 3 曲再生すると、曲名が更新される。
+	更新された曲名は songnameserver.pl を実行中のターミナルに表示される。
+	また、ブラウザで http://localhost:8000/ にアクセスすると曲名が表示される。
 
 
-C. "icecast Song" プラグインの使用手順
+[B: CamTwist "Traktor Song" plugin を使おう]
 
-C-1. icecast2 を起動する(参照:B-2)
+B-1. Traktor Song.qtz をインストール
+	下記のどちらかに Traktor Song.qtz ファイルを置く
+		・ CamTwist インストールフォルダの Effects フォルダ
+		・ ~/Library/Application Support/CamTwist/Effects
 
-C-2. Traktor からストリーミングを開始する(参照:B-3)
+B-2. Traktor からストリーミングを開始する
+	A-3, A-4 を行ってください。
 
-C-3. CamTwist で "icecast Song" エフェクトをADDする
+B-3. CamTwist で "Traktor Song" エフェクトをADDして、好みの表示設定にする
+	[Adv.] ホストやポート名の設定を変えた場合は "icecast URL" を変更する
+	文字サイズや表示位置などを調整する
 
-C-4. [Adv.] A-3でホストやポート名の設定を変えた場合は "icecast URL" を変更する
+曲名が更新されると CamTwist の画面に反映されます。
+二回目以降は B-2 から行ってください。
 
-C-5. 必要なら "icecast Song" の文字サイズや表示位置などを調整する
+
+[C: tweet-from-traktor.pl を使おう]
+
+C-1. Net::Twitter モジュールのインストール
+	cpan や cpanm を使い Net::Twitter をインストールする
+
+C-2. Twitter アプリケーションを登録
+	https://dev.twitter.com/apps にアクセスして、Twitterへポスト
+	するための新しいアプリケーションを登録する
+	登録したアプリケーションのページから、以下を取得する
+		Consumer key
+		Consumer secret
+		Access token
+		Access token secret
+
+C-2. tweet-from-traktor.pl を設定
+	tweet-from-traktor.pl を開き、取得した4つの文字列を
+	consumer_key        => '',
+	consumer_secret     => '',
+	access_token        => '',
+	access_token_secret => '',
+	に設定する。
+	また A-1 で行った設定があれば、 songnameserver.pl にも同じ設定を行う。
+	【重要】 $postfix をいい感じにする（イベントのハッシュタグとか）
+
+C-3. tweet-from-traktor.pl を起動
+	ターミナルで perl tweet-from-traktor.pl を実行
+	(tweet-from-traktor.pl が Traktor::SongNameServer を起動するので、
+	 songnameserver.pl は使いません)
+
+C-4. Traktor からストリーミングを開始する
+	A-4 を行ってください。
+
+曲名が更新されると、Twitterにポストされます。
+二回目以降は C-3 から行ってください。
 

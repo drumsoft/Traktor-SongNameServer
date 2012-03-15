@@ -1,10 +1,18 @@
-CamTwist "icecast Song" plugin
-
-"icecast Song" plugin (with a little hack to icecast2) displays track names playing on Traktor PCDJ to CamTwist virtual camera.
-
-other PCDJ products that supports icecast streaming will work with this plugin.
-
-Additionally, TweetFromTraktor.pl post the song names to twitter.
+Traktor::SongNameServer, tweet-from-traktor.pl and CamTwist "Traktor Song" plugin
 
 日本語の説明は readme-j.txt を読んで下さい。
+
+
+[Traktor::SongNameServer]
+Traktor::SongNameServer is a server, receives song names from Traktor and provides them for other applications.
+It will work with other PCDJ softwares if they send icecast streaming protocols.
+To launch server, use songnameserver.pl .
+
+[tweet-from-traktor.pl]
+a script to post song names played by Traktor to twitter.
+This script works as server using Traktor::SongNameServer.
+
+[CamTwist "Traktor Song" plugin]
+a CamTwist plugin to display song names played by Traktor.
+This plugin fetches song names from Traktor::SongNameServer. then you should run it by songnameserver.pl or tweet-from-traktor.pl.
 
