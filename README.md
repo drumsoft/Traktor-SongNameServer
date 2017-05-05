@@ -30,7 +30,7 @@ This plugin fetches song names from Traktor::SongNameServer by HTTP and XML. You
 
 [preparation]
  1. Ensure that Traktor is configured to write to the icecast server. 
- [](documents/traktor-preference-broadcast.jpg?raw=true).
+ ![](documents/traktor-preference-broadcast.jpg?raw=true).
 
 [start playing]
  1. To launch server, execute it in a terminal.
@@ -38,7 +38,7 @@ This plugin fetches song names from Traktor::SongNameServer by HTTP and XML. You
 perl songnameserver.pl.
 ```
  2. Start broadcasting in Traktor's recorder panel
- [](documents/traktor-panel-broadcast.jpg?raw=true).
+ ![](documents/traktor-panel-broadcast.jpg?raw=true).
 
  3. Start playing some songs. The song names will be shown on server terminal with 1 song delay. and You can also get song names as XML format by accessing http://localhost:8000/ .
 
